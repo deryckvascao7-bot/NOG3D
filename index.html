@@ -459,7 +459,15 @@
     <form class="add-form" id="formEstoque">
       <label class="field"><span class="lbl">Tipo de insumo</span><select id="e_tipo"></select></label>
       <label class="field"><span class="lbl">Subcategoria</span><select id="e_subcategoria"></select></label>
-      <label class="field span2"><span class="lbl">Descrição</span><input type="text" id="e_descricao" placeholder="Ex: Azul, marca Creality, 1kg"></label>
+      <label class="field"><span class="lbl">Descrição</span><input type="text" id="e_descricao" placeholder="Ex: Azul, 1kg"></label>
+      <label class="field"><span class="lbl">Característica (opcional)</span><input type="text" id="e_caracteristica" placeholder="Ex: marca Creality"></label>
+      <label class="field"><span class="lbl">Classificação</span>
+        <select id="e_classificacao">
+          <option value="consumo">Consumo</option>
+          <option value="permanente">Permanente</option>
+          <option value="continuo">Uso contínuo</option>
+        </select>
+      </label>
       <label class="field"><span class="lbl">Unidade</span>
         <select id="e_unidade">
           <option value="g">Peso (g/kg)</option>
@@ -476,7 +484,7 @@
 
     <div class="list-card">
       <table class="tbl" id="tblEstoque">
-        <thead><tr><th>Tipo</th><th>Insumo</th><th style="text-align:right">Saldo</th><th style="text-align:right">Custo médio</th><th></th></tr></thead>
+        <thead><tr><th>Tipo</th><th>Insumo</th><th>Classificação</th><th style="text-align:right">Saldo</th><th style="text-align:right">Custo médio</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
       <div class="empty" id="emptyEstoque" style="display:none;">Nenhum insumo cadastrado ainda.</div>
@@ -501,10 +509,41 @@
 
     <form class="add-form" id="formDespesa">
       <label class="field"><span class="lbl">Data</span><input type="date" id="d_data" required></label>
-      <label class="field"><span class="lbl">Categoria</span>
-        <select id="d_categoria"></select>
+      <label class="field checkbox-field"><span class="lbl">&nbsp;</span>
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; padding-top:8px;">
+          <input type="checkbox" id="d_vincularEstoque" style="width:auto;"> Vincular ao almoxarifado (compra de insumo)
+        </label>
       </label>
-      <label class="field span2"><span class="lbl">Descrição</span><input type="text" id="d_desc" placeholder="Ex: Bobina PLA branco 1kg"></label>
+
+      <div id="despesaCamposSimples" class="field-grid" style="grid-column:1/-1; display:grid;">
+        <label class="field"><span class="lbl">Categoria</span>
+          <select id="d_categoria"></select>
+        </label>
+        <label class="field span2" style="grid-column:span 2;"><span class="lbl">Descrição</span><input type="text" id="d_desc" placeholder="Ex: Bobina PLA branco 1kg"></label>
+      </div>
+
+      <div id="despesaCamposEstoque" class="field-grid" style="grid-column:1/-1; display:none;">
+        <label class="field"><span class="lbl">Tipo de insumo</span><select id="desp_tipo"></select></label>
+        <label class="field"><span class="lbl">Subcategoria</span><select id="desp_subcategoria"></select></label>
+        <label class="field"><span class="lbl">Descrição</span><input type="text" id="desp_descricao" placeholder="Ex: Azul, 1kg"></label>
+        <label class="field"><span class="lbl">Característica (opcional)</span><input type="text" id="desp_caracteristica" placeholder="Ex: marca Creality"></label>
+        <label class="field"><span class="lbl">Classificação</span>
+          <select id="desp_classificacao">
+            <option value="consumo">Consumo</option>
+            <option value="permanente">Permanente</option>
+            <option value="continuo">Uso contínuo</option>
+          </select>
+        </label>
+        <label class="field"><span class="lbl">Unidade</span>
+          <select id="desp_unidade">
+            <option value="g">Peso (g/kg)</option>
+            <option value="ml">Volume (ml/L)</option>
+            <option value="un">Unidades</option>
+          </select>
+        </label>
+        <label class="field"><span class="lbl">Quantidade</span><input type="number" step="1" min="0" id="desp_qtd"></label>
+      </div>
+
       <label class="field"><span class="lbl">Valor (R$)</span><input type="number" step="0.01" min="0" id="d_valor" required></label>
       <button class="btn primary" type="submit">Adicionar</button>
     </form>
@@ -833,8 +872,9 @@
     };
   }
 
-  function fromApiEstoqueItem(r){ return { id:r.ID, nome:r.Nome, tipo:r.Tipo, subcategoria:r.Subcategoria, descricao:r.Descricao, unidade:r.Unidade, saldo:num(r.Saldo), custoRef: (r.CustoRef===''||r.CustoRef==null) ? null : num(r.CustoRef), minimo:num(r.Minimo), historico:[] }; }
-  function toApiEstoqueItem(o){ return { Nome:o.nome, Tipo:o.tipo, Subcategoria:o.subcategoria, Descricao:o.descricao, Unidade:o.unidade, Saldo:o.saldo, CustoRef:o.custoRef, Minimo:o.minimo }; }
+  function fromApiEstoqueItem(r){ return { id:r.ID, nome:r.Nome, tipo:r.Tipo, subcategoria:r.Subcategoria, descricao:r.Descricao, caracteristica:r.Caracteristica||'', classificacao:r.Classificacao||'consumo', unidade:r.Unidade, saldo:num(r.Saldo), custoRef: (r.CustoRef===''||r.CustoRef==null) ? null : num(r.CustoRef), minimo:num(r.Minimo), historico:[] }; }
+  function toApiEstoqueItem(o){ return { Nome:o.nome, Tipo:o.tipo, Subcategoria:o.subcategoria, Descricao:o.descricao, Caracteristica:o.caracteristica||'', Classificacao:o.classificacao||'consumo', Unidade:o.unidade, Saldo:o.saldo, CustoRef:o.custoRef, Minimo:o.minimo }; }
+  function labelClassificacao(c){ return c==='permanente' ? 'Permanente' : (c==='continuo' ? 'Uso contínuo' : 'Consumo'); }
 
   function fromApiHistorico(r){ return { id:r.ID, itemId:r.ItemID, data:r.Data, tipo:r.Tipo, qtd:num(r.Qtd), obs:r.Obs }; }
   function toApiHistorico(o){ return { ItemID:o.itemId, Data:o.data, Tipo:o.tipo, Qtd:o.qtd, Obs:o.obs }; }
@@ -944,6 +984,11 @@
     sel.innerHTML = params.categoriasDespesa.map(function(c){ return '<option>'+c+'</option>'; }).join('');
     if(params.categoriasDespesa.indexOf(current) !== -1) sel.value = current;
   }
+  function unidadeSugerida(tipo){
+    if(tipo === 'Filamento') return 'g';
+    if(tipo === 'Resina') return 'ml';
+    return 'un';
+  }
   function refreshTipoInsumoSelects(){
     var tipos = Object.keys(params.tiposInsumo);
     var eTipo = document.getElementById('e_tipo');
@@ -952,11 +997,34 @@
     if(tipos.indexOf(current) !== -1) eTipo.value = current;
     refreshSubcategoriaSelect();
 
+    var despTipo = document.getElementById('desp_tipo');
+    var currentD = despTipo.value;
+    despTipo.innerHTML = tipos.map(function(t){ return '<option>'+t+'</option>'; }).join('');
+    if(tipos.indexOf(currentD) !== -1) despTipo.value = currentD;
+    refreshDespSubcategoriaSelect();
+
     var manageSel = document.getElementById('tipoParaGerenciar');
     var currentM = manageSel.value;
     manageSel.innerHTML = tipos.map(function(t){ return '<option>'+t+'</option>'; }).join('');
     if(tipos.indexOf(currentM) !== -1) manageSel.value = currentM;
   }
+  function refreshDespSubcategoriaSelect(){
+    var tipo = document.getElementById('desp_tipo').value;
+    var subs = params.tiposInsumo[tipo] || ['Outro'];
+    var sel = document.getElementById('desp_subcategoria');
+    var current = sel.value;
+    sel.innerHTML = subs.map(function(s){ return '<option>'+s+'</option>'; }).join('');
+    if(subs.indexOf(current) !== -1) sel.value = current;
+  }
+  document.getElementById('desp_tipo').addEventListener('change', function(){
+    refreshDespSubcategoriaSelect();
+    document.getElementById('desp_unidade').value = unidadeSugerida(this.value);
+  });
+  document.getElementById('d_vincularEstoque').addEventListener('change', function(){
+    var ligado = this.checked;
+    document.getElementById('despesaCamposSimples').style.display = ligado ? 'none' : 'grid';
+    document.getElementById('despesaCamposEstoque').style.display = ligado ? 'grid' : 'none';
+  });
   function refreshSubcategoriaSelect(){
     var tipo = document.getElementById('e_tipo').value;
     var subs = params.tiposInsumo[tipo] || ['Outro'];
@@ -965,7 +1033,10 @@
     sel.innerHTML = subs.map(function(s){ return '<option>'+s+'</option>'; }).join('');
     if(subs.indexOf(current) !== -1) sel.value = current;
   }
-  document.getElementById('e_tipo').addEventListener('change', refreshSubcategoriaSelect);
+  document.getElementById('e_tipo').addEventListener('change', function(){
+    refreshSubcategoriaSelect();
+    document.getElementById('e_unidade').value = unidadeSugerida(this.value);
+  });
 
   function renderListaComRemocao(containerId, items, onRemove){
     var box = document.getElementById(containerId);
@@ -1105,6 +1176,7 @@
 
   /* ---------- FOTO ---------- */
   var pendingFotoDataUrl = null;
+  var pendingVendaOrcId = null;
   document.getElementById('o_foto').addEventListener('change', function(e){
     var file = e.target.files && e.target.files[0];
     if(!file){ pendingFotoDataUrl = null; return; }
@@ -1142,21 +1214,22 @@
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td><span class="tag-cat">'+(it.tipo||'—')+'</span></td>'+
-        '<td>'+it.nome+(low ? ' <span class="stock-badge-low">(baixo)</span>' : '')+'</td>'+
+        '<td>'+it.nome+(it.caracteristica?' <span style="color:var(--muted); font-size:12px;">('+it.caracteristica+')</span>':'')+(low ? ' <span class="stock-badge-low">(baixo)</span>' : '')+'</td>'+
+        '<td><span class="tag-cat">'+labelClassificacao(it.classificacao)+'</span></td>'+
         '<td class="num"'+(low?' class="stock-badge-low"':'')+'>'+fmtQty(it.saldo, it.unidade)+'</td>'+
         '<td class="num">'+(it.custoRef ? (it.unidade==='un' ? brl(it.custoRef)+'/un' : brl(it.custoRef)+'/'+unidadeLabel(it.unidade)) : '—')+'</td>'+
         '<td class="actions">'+
           '<button class="btn ghost small" data-baixa="'+it.id+'">Dar baixa</button> '+
           '<button class="btn ghost small" data-hist="'+it.id+'">Histórico</button> '+
-          '<button class="btn danger-ghost" data-delEst="'+it.id+'">Remover</button>'+
+          '<button class="btn danger-ghost" data-del-estoque="'+it.id+'">Remover</button>'+
         '</td>';
       tbody.appendChild(tr);
     });
     tbody.querySelectorAll('[data-baixa]').forEach(function(btn){ btn.addEventListener('click', function(){ openBaixaModal(btn.dataset.baixa); }); });
     tbody.querySelectorAll('[data-hist]').forEach(function(btn){ btn.addEventListener('click', function(){ openHistoricoModal(btn.dataset.hist); }); });
-    tbody.querySelectorAll('[data-delEst]').forEach(function(btn){
+    tbody.querySelectorAll('[data-del-estoque]').forEach(function(btn){
       btn.addEventListener('click', function(){
-        var id = btn.dataset.delEst;
+        var id = btn.dataset.delEstoque;
         apiPost('excluirEstoqueItem', { id: id }).then(function(){
           estoque = estoque.filter(function(it){ return it.id !== id; });
           renderEstoque(); refreshEstoqueSelect();
@@ -1167,11 +1240,59 @@
   }
 
   document.getElementById('e_data').value = todayStr();
+  function registrarCompraEstoque(dados){
+    // dados: {tipo, subcategoria, descricao, caracteristica, classificacao, unidade, qtd, valor, minimo, data, obs}
+    var nomeParts = [dados.tipo];
+    if(dados.subcategoria && dados.subcategoria !== 'Outro') nomeParts.push(dados.subcategoria);
+    if(dados.descricao) nomeParts.push(dados.descricao);
+    var nome = nomeParts.join(' · ');
+    var existing = estoque.find(function(it){
+      return it.tipo === dados.tipo && (it.subcategoria||'') === dados.subcategoria && (it.descricao||'').toLowerCase() === (dados.descricao||'').toLowerCase();
+    });
+    var refDivisor = dados.unidade === 'un' ? 1 : 1000;
+    var obsHist = dados.obs || (dados.valor ? ('Compra — '+brl(dados.valor)) : 'Compra');
+
+    if(existing){
+      var valorAntigo = (existing.custoRef || 0) * (existing.saldo/refDivisor);
+      var saldoTotal = existing.saldo + dados.qtd;
+      var novoCustoRef = existing.custoRef;
+      if(dados.valor > 0 || existing.custoRef){
+        novoCustoRef = saldoTotal > 0 ? (valorAntigo + dados.valor) / (saldoTotal/refDivisor) : existing.custoRef;
+      }
+      var patch = { Saldo: saldoTotal, CustoRef: novoCustoRef, Minimo: dados.minimo || existing.minimo };
+      if(dados.caracteristica) patch.Caracteristica = dados.caracteristica;
+      if(dados.classificacao) patch.Classificacao = dados.classificacao;
+      return apiPost('atualizarEstoqueItem', { id: existing.id, patch: patch }).then(function(){
+        return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: existing.id, data: dados.data, tipo: 'compra', qtd: dados.qtd, obs: obsHist }) });
+      }).then(function(hr){
+        existing.saldo = saldoTotal; existing.custoRef = novoCustoRef; if(dados.minimo) existing.minimo = dados.minimo;
+        if(dados.caracteristica) existing.caracteristica = dados.caracteristica;
+        if(dados.classificacao) existing.classificacao = dados.classificacao;
+        var h = fromApiHistorico(hr); estoqueHistorico.push(h); existing.historico.push(h);
+        renderEstoque();
+        return existing;
+      });
+    } else {
+      var novoItem = { nome: nome, tipo: dados.tipo, subcategoria: dados.subcategoria, descricao: dados.descricao, caracteristica: dados.caracteristica||'', classificacao: dados.classificacao||'consumo', unidade: dados.unidade, saldo: dados.qtd, custoRef: dados.valor > 0 ? (dados.valor/(dados.qtd/refDivisor)) : null, minimo: dados.minimo };
+      return apiPost('criarEstoqueItem', { payload: toApiEstoqueItem(novoItem) }).then(function(r){
+        var item = fromApiEstoqueItem(r);
+        return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: item.id, data: dados.data, tipo: 'compra', qtd: dados.qtd, obs: obsHist }) }).then(function(hr){
+          var h = fromApiHistorico(hr); item.historico = [h]; estoqueHistorico.push(h);
+          estoque.push(item);
+          renderEstoque();
+          return item;
+        });
+      });
+    }
+  }
+
   document.getElementById('formEstoque').addEventListener('submit', function(e){
     e.preventDefault();
     var tipo = document.getElementById('e_tipo').value;
     var subcategoria = document.getElementById('e_subcategoria').value;
     var descricao = document.getElementById('e_descricao').value.trim();
+    var caracteristica = document.getElementById('e_caracteristica').value.trim();
+    var classificacao = document.getElementById('e_classificacao').value;
     var unidade = document.getElementById('e_unidade').value;
     var qtd = parseFloat(document.getElementById('e_qtd').value);
     var valor = parseFloat(document.getElementById('e_valor').value) || 0;
@@ -1179,52 +1300,14 @@
     var data = document.getElementById('e_data').value || todayStr();
     if(!tipo || isNaN(qtd) || qtd <= 0) return;
 
-    var nomeParts = [tipo];
-    if(subcategoria && subcategoria !== 'Outro') nomeParts.push(subcategoria);
-    if(descricao) nomeParts.push(descricao);
-    var nome = nomeParts.join(' · ');
-
-    var existing = estoque.find(function(it){
-      return it.tipo === tipo && (it.subcategoria||'') === subcategoria && (it.descricao||'').toLowerCase() === descricao.toLowerCase();
-    });
-    var refDivisor = unidade === 'un' ? 1 : 1000;
-    var obsHist = valor ? ('Compra — '+brl(valor)) : 'Compra';
-
-    function limparFormEstoque(){
+    registrarCompraEstoque({ tipo:tipo, subcategoria:subcategoria, descricao:descricao, caracteristica:caracteristica, classificacao:classificacao, unidade:unidade, qtd:qtd, valor:valor, minimo:minimo, data:data }).then(function(){
       document.getElementById('e_descricao').value = "";
+      document.getElementById('e_caracteristica').value = "";
       document.getElementById('e_qtd').value = "";
       document.getElementById('e_valor').value = "";
       document.getElementById('e_minimo').value = "";
-    }
-
-    if(existing){
-      var valorAntigo = (existing.custoRef || 0) * (existing.saldo/refDivisor);
-      var saldoTotal = existing.saldo + qtd;
-      var novoCustoRef = existing.custoRef;
-      if(valor > 0 || existing.custoRef){
-        novoCustoRef = saldoTotal > 0 ? (valorAntigo + valor) / (saldoTotal/refDivisor) : existing.custoRef;
-      }
-      var patch = { Saldo: saldoTotal, CustoRef: novoCustoRef, Minimo: minimo || existing.minimo };
-      apiPost('atualizarEstoqueItem', { id: existing.id, patch: patch }).then(function(){
-        return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: existing.id, data: data, tipo: 'compra', qtd: qtd, obs: obsHist }) });
-      }).then(function(hr){
-        existing.saldo = saldoTotal; existing.custoRef = novoCustoRef; if(minimo) existing.minimo = minimo;
-        var h = fromApiHistorico(hr); estoqueHistorico.push(h); existing.historico.push(h);
-        limparFormEstoque(); renderEstoque();
-        showToast('Estoque atualizado.');
-      }).catch(function(){ apiFail(); });
-    } else {
-      var novoItem = { nome: nome, tipo: tipo, subcategoria: subcategoria, descricao: descricao, unidade: unidade, saldo: qtd, custoRef: valor > 0 ? (valor/(qtd/refDivisor)) : null, minimo: minimo };
-      apiPost('criarEstoqueItem', { payload: toApiEstoqueItem(novoItem) }).then(function(r){
-        var item = fromApiEstoqueItem(r);
-        return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: item.id, data: data, tipo: 'compra', qtd: qtd, obs: obsHist }) }).then(function(hr){
-          var h = fromApiHistorico(hr); item.historico = [h]; estoqueHistorico.push(h);
-          estoque.push(item);
-          limparFormEstoque(); renderEstoque();
-          showToast('Estoque atualizado.');
-        });
-      }).catch(function(){ apiFail(); });
-    }
+      showToast('Estoque atualizado.');
+    }).catch(function(){ apiFail(); });
   });
 
   function openBaixaModal(itemId){
@@ -1539,7 +1622,7 @@
         '<td>'+clienteLabel+'</td>'+
         '<td class="num">'+o.peso+' g</td>'+
         '<td class="num">'+o.horas+' h</td>'+
-        '<td class="actions"><button class="btn ghost small" data-ver="'+o.id+'">Ver</button> <button class="btn mint small" data-imp="'+o.id+'">Marcar impresso</button></td>';
+        '<td class="actions"><button class="btn ghost small" data-ver="'+o.id+'">Ver</button> <button class="btn mint small" data-imp="'+o.id+'">Impressão finalizada</button></td>';
       tbody.appendChild(tr);
     });
     tbody.querySelectorAll('[data-ver]').forEach(function(btn){ btn.addEventListener('click', function(){ openOrcModal(btn.dataset.ver); }); });
@@ -1606,6 +1689,7 @@
     if(confirmVendaBtn) confirmVendaBtn.addEventListener('click', function(){
       apiPost('atualizarOrcamento', { id: o.id, patch: { Status: 'vendido' } }).then(function(){
         o.status = 'vendido';
+        pendingVendaOrcId = o.id;
         document.getElementById('v_data').value = todayStr();
         document.getElementById('v_produto').value = o.nome;
         document.getElementById('v_cliente').value = o.cliente || '';
@@ -1777,17 +1861,55 @@
     e.preventDefault();
     var valor = parseFloat(document.getElementById('d_valor').value);
     if(isNaN(valor)) return;
-    var nova = {
-      data: document.getElementById('d_data').value || todayStr(),
-      categoria: document.getElementById('d_categoria').value,
-      desc: document.getElementById('d_desc').value.trim(),
-      valor: valor
-    };
-    apiPost('criarDespesa', { payload: toApiDespesa(nova) }).then(function(r){
-      despesas.push(fromApiDespesa(r));
-      document.getElementById('d_desc').value = "";
+    var data = document.getElementById('d_data').value || todayStr();
+    var vinculado = document.getElementById('d_vincularEstoque').checked;
+
+    function limparCamposComuns(){
       document.getElementById('d_valor').value = "";
+    }
+
+    if(!vinculado){
+      var nova = {
+        data: data,
+        categoria: document.getElementById('d_categoria').value,
+        desc: document.getElementById('d_desc').value.trim(),
+        valor: valor
+      };
+      apiPost('criarDespesa', { payload: toApiDespesa(nova) }).then(function(r){
+        despesas.push(fromApiDespesa(r));
+        document.getElementById('d_desc').value = "";
+        limparCamposComuns();
+        renderDespesas();
+      }).catch(function(){ apiFail(); });
+      return;
+    }
+
+    var tipo = document.getElementById('desp_tipo').value;
+    var subcategoria = document.getElementById('desp_subcategoria').value;
+    var descricao = document.getElementById('desp_descricao').value.trim();
+    var caracteristica = document.getElementById('desp_caracteristica').value.trim();
+    var classificacao = document.getElementById('desp_classificacao').value;
+    var unidade = document.getElementById('desp_unidade').value;
+    var qtd = parseFloat(document.getElementById('desp_qtd').value);
+    if(!tipo || isNaN(qtd) || qtd <= 0){ showToast('Preencha tipo e quantidade do insumo.'); return; }
+
+    var nomeItem = [tipo, (subcategoria&&subcategoria!=='Outro')?subcategoria:null, descricao].filter(Boolean).join(' · ');
+
+    registrarCompraEstoque({
+      tipo: tipo, subcategoria: subcategoria, descricao: descricao, caracteristica: caracteristica,
+      classificacao: classificacao, unidade: unidade, qtd: qtd, valor: valor, minimo: 0, data: data,
+      obs: 'Compra (despesa vinculada)'
+    }).then(function(){
+      var novaDespesa = { data: data, categoria: tipo, desc: nomeItem + (caracteristica ? (' — '+caracteristica) : ''), valor: valor };
+      return apiPost('criarDespesa', { payload: toApiDespesa(novaDespesa) });
+    }).then(function(r){
+      despesas.push(fromApiDespesa(r));
+      document.getElementById('desp_descricao').value = "";
+      document.getElementById('desp_caracteristica').value = "";
+      document.getElementById('desp_qtd').value = "";
+      limparCamposComuns();
       renderDespesas();
+      showToast('Despesa registrada e estoque atualizado.');
     }).catch(function(){ apiFail(); });
   });
 
@@ -1845,6 +1967,17 @@
       document.getElementById('v_custo').value = "0";
       document.getElementById('v_qtd').value = "1";
       renderVendas();
+
+      if(pendingVendaOrcId){
+        var orcId = pendingVendaOrcId;
+        pendingVendaOrcId = null;
+        var precoFinalConfirmado = nova.preco * nova.qtd;
+        var lucroConfirmado = (nova.preco - nova.custo) * nova.qtd;
+        apiPost('atualizarOrcamento', { id: orcId, patch: { PrecoFinal: precoFinalConfirmado, Lucro: lucroConfirmado } }).then(function(){
+          var o = orcamentos.find(function(x){ return x.id === orcId; });
+          if(o){ o.precoFinal = precoFinalConfirmado; o.lucro = lucroConfirmado; renderOrcamentos(); }
+        }).catch(function(){ apiFail('Venda registrada, mas não consegui atualizar o valor no orçamento original.'); });
+      }
     }).catch(function(){ apiFail(); });
   });
 
