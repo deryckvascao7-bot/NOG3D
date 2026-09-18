@@ -219,7 +219,25 @@
   @media (max-width: 780px){ form.add-form{ grid-template-columns: 1fr 1fr; } }
   form.add-form label.field{ grid-column: span 1; }
   form.add-form .span2{ grid-column: span 2; }
-  form.add-form button{ grid-column: span 1; height: 38px; }
+  form.add-form button{ grid-column: span 2; height: 38px; min-width: 160px; white-space: nowrap; }
+  .checkbox-field{
+    grid-column: 1 / -1; flex-direction: row !important; align-items: center; gap: 10px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; cursor: pointer;
+  }
+  .checkbox-field input[type="checkbox"]{
+    width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer;
+  }
+  .checkbox-field span{ font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .checkbox-field span em{ font-style: normal; font-weight: 400; color: var(--muted); }
+
+  .filter-bar{
+    display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;
+    background: var(--surface-2); border:1px solid var(--border); border-radius:8px;
+    padding: 12px 14px; margin-bottom: 14px;
+  }
+  .filter-bar .field{ min-width: 150px; flex: 1 1 150px; }
+  .filter-bar button{ height: 38px; }
 
   .kpis{ display:grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 18px; }
   @media (max-width:900px){ .kpis{ grid-template-columns: 1fr 1fr 1fr; } }
@@ -429,6 +447,28 @@
 
     <div class="hr"></div>
     <h2 class="section-title">Orçamentos registrados</h2>
+    <div class="filter-bar">
+      <label class="field"><span class="lbl">Status</span>
+        <select id="f_o_status">
+          <option value="">Todos os status</option>
+          <option value="aberto">Em aberto</option>
+          <option value="em_producao">Em produção</option>
+          <option value="vendido">Vendido</option>
+          <option value="nao_vendido">Não vendido</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </label>
+      <label class="field"><span class="lbl">Finalidade</span>
+        <select id="f_o_finalidade">
+          <option value="">Todas</option>
+          <option value="venda">Venda</option>
+          <option value="pessoal">Uso pessoal</option>
+          <option value="presente">Presente</option>
+        </select>
+      </label>
+      <label class="field"><span class="lbl">Buscar</span><input type="text" id="f_o_busca" placeholder="Nome, código ou cliente"></label>
+      <button class="btn ghost small" id="f_o_limpar" type="button">Limpar filtros</button>
+    </div>
     <div class="orc-grid" id="orcGrid"></div>
     <div class="empty" id="emptyOrc" style="display:none;">Nenhum orçamento registrado ainda.</div>
   </section>
@@ -470,17 +510,33 @@
       </label>
       <label class="field"><span class="lbl">Unidade</span>
         <select id="e_unidade">
-          <option value="g">Peso (g/kg)</option>
-          <option value="ml">Volume (ml/L)</option>
+          <option value="g">Grama (g)</option>
+          <option value="kg">Quilograma (kg)</option>
+          <option value="ml">Mililitro (ml)</option>
+          <option value="l">Litro (L)</option>
           <option value="un">Unidades</option>
         </select>
       </label>
-      <label class="field"><span class="lbl">Quantidade</span><input type="number" step="1" min="0" id="e_qtd" required></label>
+      <label class="field"><span class="lbl">Quantidade</span><input type="number" step="0.001" min="0" id="e_qtd" required></label>
       <label class="field"><span class="lbl">Valor pago (R$)</span><input type="number" step="0.01" min="0" id="e_valor"></label>
       <label class="field"><span class="lbl">Estoque mínimo</span><input type="number" step="1" min="0" id="e_minimo" placeholder="Ex: 100"></label>
       <label class="field"><span class="lbl">Data</span><input type="date" id="e_data"></label>
       <button class="btn primary" type="submit">Adicionar ao estoque</button>
     </form>
+
+    <div class="filter-bar">
+      <label class="field"><span class="lbl">Filtrar por tipo</span><select id="f_e_tipo"><option value="">Todos os tipos</option></select></label>
+      <label class="field"><span class="lbl">Classificação</span>
+        <select id="f_e_classificacao">
+          <option value="">Todas</option>
+          <option value="consumo">Consumo</option>
+          <option value="permanente">Permanente</option>
+          <option value="continuo">Uso contínuo</option>
+        </select>
+      </label>
+      <label class="field"><span class="lbl">Buscar</span><input type="text" id="f_e_busca" placeholder="Nome do insumo"></label>
+      <button class="btn ghost small" id="f_e_limpar" type="button">Limpar filtros</button>
+    </div>
 
     <div class="list-card">
       <table class="tbl" id="tblEstoque">
@@ -509,10 +565,9 @@
 
     <form class="add-form" id="formDespesa">
       <label class="field"><span class="lbl">Data</span><input type="date" id="d_data" required></label>
-      <label class="field checkbox-field"><span class="lbl">&nbsp;</span>
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; padding-top:8px;">
-          <input type="checkbox" id="d_vincularEstoque" style="width:auto;"> Vincular ao almoxarifado (compra de insumo)
-        </label>
+      <label class="field checkbox-field">
+        <input type="checkbox" id="d_vincularEstoque">
+        <span>Vincular ao almoxarifado <em>(compra de insumo)</em></span>
       </label>
 
       <div id="despesaCamposSimples" class="field-grid" style="grid-column:1/-1; display:grid;">
@@ -536,17 +591,27 @@
         </label>
         <label class="field"><span class="lbl">Unidade</span>
           <select id="desp_unidade">
-            <option value="g">Peso (g/kg)</option>
-            <option value="ml">Volume (ml/L)</option>
+            <option value="g">Grama (g)</option>
+            <option value="kg">Quilograma (kg)</option>
+            <option value="ml">Mililitro (ml)</option>
+            <option value="l">Litro (L)</option>
             <option value="un">Unidades</option>
           </select>
         </label>
-        <label class="field"><span class="lbl">Quantidade</span><input type="number" step="1" min="0" id="desp_qtd"></label>
+        <label class="field"><span class="lbl">Quantidade</span><input type="number" step="0.001" min="0" id="desp_qtd"></label>
       </div>
 
       <label class="field"><span class="lbl">Valor (R$)</span><input type="number" step="0.01" min="0" id="d_valor" required></label>
       <button class="btn primary" type="submit">Adicionar</button>
     </form>
+
+    <div class="filter-bar">
+      <label class="field"><span class="lbl">Filtrar por categoria</span><select id="f_d_categoria"><option value="">Todas as categorias</option></select></label>
+      <label class="field"><span class="lbl">Buscar na descrição</span><input type="text" id="f_d_busca" placeholder="Ex: bobina"></label>
+      <label class="field"><span class="lbl">De</span><input type="date" id="f_d_de"></label>
+      <label class="field"><span class="lbl">Até</span><input type="date" id="f_d_ate"></label>
+      <button class="btn ghost small" id="f_d_limpar" type="button">Limpar filtros</button>
+    </div>
 
     <div class="list-card">
       <table class="tbl" id="tblDespesas">
@@ -573,6 +638,13 @@
       <label class="field"><span class="lbl">Preço vendido unit. (R$)</span><input type="number" step="0.01" min="0" id="v_preco" required></label>
       <button class="btn primary" type="submit">Adicionar</button>
     </form>
+
+    <div class="filter-bar">
+      <label class="field"><span class="lbl">Filtrar por categoria</span><select id="f_v_categoria"><option value="">Todas as categorias</option></select></label>
+      <label class="field"><span class="lbl">Cliente</span><input type="text" id="f_v_cliente" placeholder="Nome do cliente"></label>
+      <label class="field"><span class="lbl">Buscar produto</span><input type="text" id="f_v_busca" placeholder="Ex: vaso"></label>
+      <button class="btn ghost small" id="f_v_limpar" type="button">Limpar filtros</button>
+    </div>
 
     <div class="list-card">
       <table class="tbl" id="tblVendas">
@@ -736,7 +808,7 @@
     </div>
   </section>
 
-      <footer class="note">Dados salvos apenas neste navegador.</footer>
+      <footer class="note">DERYCK NOGUEIRA</footer>
     </div>
   </main>
 </div>
@@ -914,6 +986,19 @@
     if(unidade === 'un') return Math.round(qty) + ' un';
     return (qty/1000).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:2}) + ' ' + unidadeLabel(unidade);
   }
+  var UNIDADE_MEDIDA = {
+    g:  { base:'g',  mult:1 },
+    kg: { base:'g',  mult:1000 },
+    ml: { base:'ml', mult:1 },
+    l:  { base:'ml', mult:1000 },
+    un: { base:'un', mult:1 }
+  };
+  var UNIDADE_ENTRADA_OPTIONS =
+    '<option value="g">Grama (g)</option>'+
+    '<option value="kg">Quilograma (kg)</option>'+
+    '<option value="ml">Mililitro (ml)</option>'+
+    '<option value="l">Litro (L)</option>'+
+    '<option value="un">Unidades</option>';
   function showToast(msg){
     var t = document.getElementById('toast');
     t.textContent = msg;
@@ -977,15 +1062,17 @@
       sel.innerHTML = params.categoriasProduto.map(function(c){ return '<option>'+c+'</option>'; }).join('');
       if(params.categoriasProduto.indexOf(current) !== -1) sel.value = current;
     });
+    refreshFiltroVendaCategoria();
   }
   function refreshCategoriaDespesaSelect(){
     var sel = document.getElementById('d_categoria');
     var current = sel.value;
     sel.innerHTML = params.categoriasDespesa.map(function(c){ return '<option>'+c+'</option>'; }).join('');
     if(params.categoriasDespesa.indexOf(current) !== -1) sel.value = current;
+    refreshFiltroDespesaCategoria();
   }
   function unidadeSugerida(tipo){
-    if(tipo === 'Filamento') return 'g';
+    if(tipo === 'Filamento') return 'kg';
     if(tipo === 'Resina') return 'ml';
     return 'un';
   }
@@ -1208,8 +1295,17 @@
   function renderEstoque(){
     var tbody = document.querySelector('#tblEstoque tbody');
     tbody.innerHTML = "";
-    document.getElementById('emptyEstoque').style.display = estoque.length ? 'none' : 'block';
-    estoque.slice().sort(function(a,b){ return a.nome.localeCompare(b.nome); }).forEach(function(it){
+    var fTipo = document.getElementById('f_e_tipo').value;
+    var fClass = document.getElementById('f_e_classificacao').value;
+    var fBusca = document.getElementById('f_e_busca').value.trim().toLowerCase();
+    var filtrado = estoque.filter(function(it){
+      if(fTipo && it.tipo !== fTipo) return false;
+      if(fClass && it.classificacao !== fClass) return false;
+      if(fBusca && !(it.nome||'').toLowerCase().includes(fBusca)) return false;
+      return true;
+    });
+    document.getElementById('emptyEstoque').style.display = filtrado.length ? 'none' : 'block';
+    filtrado.slice().sort(function(a,b){ return a.nome.localeCompare(b.nome); }).forEach(function(it){
       var low = it.minimo && it.saldo < it.minimo;
       var tr = document.createElement('tr');
       tr.innerHTML =
@@ -1237,7 +1333,25 @@
       });
     });
     refreshEstoqueSelect();
+    refreshFiltroEstoqueTipo();
   }
+  function refreshFiltroEstoqueTipo(){
+    var sel = document.getElementById('f_e_tipo');
+    var current = sel.value;
+    var tipos = Object.keys(params.tiposInsumo);
+    sel.innerHTML = '<option value="">Todos os tipos</option>' + tipos.map(function(t){ return '<option>'+t+'</option>'; }).join('');
+    sel.value = current;
+  }
+  ['f_e_tipo','f_e_classificacao','f_e_busca'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', renderEstoque);
+    document.getElementById(id).addEventListener('change', renderEstoque);
+  });
+  document.getElementById('f_e_limpar').addEventListener('click', function(){
+    document.getElementById('f_e_tipo').value = '';
+    document.getElementById('f_e_classificacao').value = '';
+    document.getElementById('f_e_busca').value = '';
+    renderEstoque();
+  });
 
   document.getElementById('e_data').value = todayStr();
   function registrarCompraEstoque(dados){
@@ -1293,12 +1407,15 @@
     var descricao = document.getElementById('e_descricao').value.trim();
     var caracteristica = document.getElementById('e_caracteristica').value.trim();
     var classificacao = document.getElementById('e_classificacao').value;
-    var unidade = document.getElementById('e_unidade').value;
-    var qtd = parseFloat(document.getElementById('e_qtd').value);
+    var unidadeEntrada = document.getElementById('e_unidade').value;
+    var qtdDigitada = parseFloat(document.getElementById('e_qtd').value);
     var valor = parseFloat(document.getElementById('e_valor').value) || 0;
     var minimo = parseFloat(document.getElementById('e_minimo').value) || 0;
     var data = document.getElementById('e_data').value || todayStr();
-    if(!tipo || isNaN(qtd) || qtd <= 0) return;
+    if(!tipo || isNaN(qtdDigitada) || qtdDigitada <= 0) return;
+    var um = UNIDADE_MEDIDA[unidadeEntrada];
+    var qtd = qtdDigitada * um.mult;
+    var unidade = um.base;
 
     registrarCompraEstoque({ tipo:tipo, subcategoria:subcategoria, descricao:descricao, caracteristica:caracteristica, classificacao:classificacao, unidade:unidade, qtd:qtd, valor:valor, minimo:minimo, data:data }).then(function(){
       document.getElementById('e_descricao').value = "";
@@ -1310,6 +1427,12 @@
     }).catch(function(){ apiFail(); });
   });
 
+  function opcoesUnidadeEntradaPara(baseUnit){
+    if(baseUnit === 'g') return '<option value="g">g</option><option value="kg">kg</option>';
+    if(baseUnit === 'ml') return '<option value="ml">ml</option><option value="l">L</option>';
+    return '<option value="un">un</option>';
+  }
+
   function openBaixaModal(itemId){
     var item = estoque.find(function(it){ return it.id === itemId; });
     if(!item) return;
@@ -1318,7 +1441,10 @@
       '<button class="modal-close" id="modalCloseBtn">✕</button>'+
       '<h3>Dar baixa — '+item.nome+'</h3>'+
       '<div class="modal-sub">Saldo atual: '+fmtQty(item.saldo, item.unidade)+'</div>'+
-      '<label class="field"><span class="lbl">Quantidade usada</span><input type="number" min="0" step="1" id="baixaQtd"></label>'+
+      '<label class="field"><span class="lbl">Quantidade usada</span>'+
+        '<div style="display:flex; gap:8px;"><input type="number" min="0" step="0.001" id="baixaQtd" style="flex:1;">'+
+        '<select id="baixaUnidade" style="width:90px;">'+opcoesUnidadeEntradaPara(item.unidade)+'</select></div>'+
+      '</label>'+
       '<label class="field" style="margin-top:10px;"><span class="lbl">Motivo / peça (opcional)</span><input type="text" id="baixaMotivo" placeholder="Ex: Vaso geométrico P"></label>'+
       '<div class="modal-foot">'+
         '<button class="btn primary" id="confirmBaixaBtn">Confirmar baixa</button>'+
@@ -1328,8 +1454,10 @@
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
     document.getElementById('cancelBaixaBtn').addEventListener('click', closeModal);
     document.getElementById('confirmBaixaBtn').addEventListener('click', function(){
-      var qtd = parseFloat(document.getElementById('baixaQtd').value);
-      if(isNaN(qtd) || qtd <= 0) return;
+      var qtdDigitada = parseFloat(document.getElementById('baixaQtd').value);
+      if(isNaN(qtdDigitada) || qtdDigitada <= 0) return;
+      var um = UNIDADE_MEDIDA[document.getElementById('baixaUnidade').value];
+      var qtd = qtdDigitada * um.mult;
       var motivo = document.getElementById('baixaMotivo').value.trim();
       var novoSaldo = item.saldo - qtd;
       apiPost('atualizarEstoqueItem', { id: item.id, patch: { Saldo: novoSaldo } }).then(function(){
@@ -1400,12 +1528,12 @@
     });
   }
 
-  function consumirEstoque(itemId, qtd){
+  function consumirEstoque(itemId, qtd, obs){
     var item = estoque.find(function(it){ return it.id === itemId; });
     if(!item) return Promise.resolve();
     var novoSaldo = item.saldo - qtd;
     return apiPost('atualizarEstoqueItem', { id: itemId, patch: { Saldo: novoSaldo } }).then(function(){
-      return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: itemId, data: todayStr(), tipo: 'baixa', qtd: qtd, obs: 'Consumo em orçamento' }) });
+      return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: itemId, data: todayStr(), tipo: 'baixa', qtd: qtd, obs: obs || 'Consumo em orçamento' }) });
     }).then(function(hr){
       item.saldo = novoSaldo;
       var h = fromApiHistorico(hr); estoqueHistorico.push(h); item.historico.push(h);
@@ -1441,13 +1569,27 @@
     box.innerHTML = consumoEstoque.map(function(c, idx){
       return '<div style="display:flex; align-items:center; gap:8px;">'+
         '<span style="flex:1; font-size:13px;">'+c.nome+'</span>'+
-        '<input type="number" min="0" step="1" style="width:90px; font-family:var(--font-mono); border:1px solid var(--border-strong); border-radius:5px; padding:6px 8px; background:var(--surface); color:var(--ink);" placeholder="qtd" value="'+(c.qtd==null?'':c.qtd)+'" data-qidx="'+idx+'">'+
-        '<span style="font-size:12px; color:var(--muted);">'+(c.unidade==='un'?'un':(c.unidade==='ml'?'ml':'g'))+'</span>'+
+        '<input type="number" min="0" step="0.001" style="width:90px; font-family:var(--font-mono); border:1px solid var(--border-strong); border-radius:5px; padding:6px 8px; background:var(--surface); color:var(--ink);" placeholder="qtd" value="'+(c.qtdDigitada==null?'':c.qtdDigitada)+'" data-qidx="'+idx+'">'+
+        '<select style="width:88px; border:1px solid var(--border-strong); border-radius:5px; padding:6px 4px; background:var(--surface); color:var(--ink);" data-uidx="'+idx+'">'+opcoesUnidadeEntradaPara(c.unidadeBase)+'</select>'+
         '<button type="button" class="btn danger-ghost" data-ridx="'+idx+'">Remover</button>'+
       '</div>';
     }).join('');
     box.querySelectorAll('[data-qidx]').forEach(function(inp){
-      inp.addEventListener('input', function(){ consumoEstoque[parseInt(inp.dataset.qidx)].qtd = parseFloat(inp.value) || 0; });
+      var idx = parseInt(inp.dataset.qidx);
+      inp.addEventListener('input', function(){
+        consumoEstoque[idx].qtdDigitada = parseFloat(inp.value) || 0;
+        var um = UNIDADE_MEDIDA[consumoEstoque[idx].unidadeEntrada];
+        consumoEstoque[idx].qtd = consumoEstoque[idx].qtdDigitada * um.mult;
+      });
+    });
+    box.querySelectorAll('[data-uidx]').forEach(function(sel){
+      var idx = parseInt(sel.dataset.uidx);
+      sel.value = consumoEstoque[idx].unidadeEntrada;
+      sel.addEventListener('change', function(){
+        consumoEstoque[idx].unidadeEntrada = sel.value;
+        var um = UNIDADE_MEDIDA[sel.value];
+        consumoEstoque[idx].qtd = (consumoEstoque[idx].qtdDigitada || 0) * um.mult;
+      });
     });
     box.querySelectorAll('[data-ridx]').forEach(function(btn){
       btn.addEventListener('click', function(){ consumoEstoque.splice(parseInt(btn.dataset.ridx), 1); renderConsumoList(); });
@@ -1461,7 +1603,7 @@
     if(consumoEstoque.some(function(c){ return c.itemId === itemId; })){ showToast('Esse insumo já foi adicionado.'); return; }
     var item = estoque.find(function(it){ return it.id === itemId; });
     if(!item) return;
-    consumoEstoque.push({ itemId: itemId, nome: item.nome, qtd: null, unidade: item.unidade });
+    consumoEstoque.push({ itemId: itemId, nome: item.nome, qtd: 0, qtdDigitada: null, unidadeBase: item.unidade, unidadeEntrada: item.unidade });
     sel.value = "";
     renderConsumoList();
   });
@@ -1540,7 +1682,7 @@
   document.getElementById('salvarOrcBtn').addEventListener('click', function(){
     var r = computeOrcamento();
     var btn = document.getElementById('salvarOrcBtn');
-    var consumoFiltrado = consumoEstoque.filter(function(c){ return c.qtd && c.qtd > 0; }).map(function(c){ return {itemId:c.itemId, nome:c.nome, qtd:c.qtd, unidade:c.unidade}; });
+    var consumoFiltrado = consumoEstoque.filter(function(c){ return c.qtd && c.qtd > 0; }).map(function(c){ return {itemId:c.itemId, nome:c.nome, qtd:c.qtd, unidade:c.unidadeBase}; });
     var base = {
       nome: r.nome || 'Peça sem nome',
       categoria: document.getElementById('o_categoria').value,
@@ -1563,7 +1705,7 @@
     }).then(function(r2){
       var registro = fromApiOrcamento(r2);
       orcamentos.push(registro);
-      var deducoes = consumoFiltrado.map(function(c){ return consumirEstoque(c.itemId, c.qtd); });
+      var deducoes = consumoFiltrado.map(function(c){ return consumirEstoque(c.itemId, c.qtd, 'Consumo — orçamento ' + registro.codigo + ' (' + registro.nome + ')'); });
       return Promise.all(deducoes).then(function(){ return registro; });
     }).then(function(registro){
       showToast('Orçamento salvo: ' + registro.codigo + '.');
@@ -1588,7 +1730,19 @@
   function renderOrcamentos(){
     var grid = document.getElementById('orcGrid');
     grid.innerHTML = "";
-    var sorted = orcamentos.slice().sort(function(a,b){ return (b.dataPedido||"").localeCompare(a.dataPedido||""); });
+    var fStatus = document.getElementById('f_o_status').value;
+    var fFinalidade = document.getElementById('f_o_finalidade').value;
+    var fBusca = document.getElementById('f_o_busca').value.trim().toLowerCase();
+    var filtrados = orcamentos.filter(function(o){
+      if(fStatus && o.status !== fStatus) return false;
+      if(fFinalidade && o.finalidade !== fFinalidade) return false;
+      if(fBusca){
+        var alvo = ((o.nome||'')+' '+(o.codigo||'')+' '+(o.cliente||'')).toLowerCase();
+        if(!alvo.includes(fBusca)) return false;
+      }
+      return true;
+    });
+    var sorted = filtrados.slice().sort(function(a,b){ return (b.dataPedido||"").localeCompare(a.dataPedido||""); });
     document.getElementById('emptyOrc').style.display = sorted.length ? 'none' : 'block';
     sorted.forEach(function(o){
       var st = statusInfo(o);
@@ -1610,6 +1764,16 @@
     renderPrazoAlert();
     renderFila();
   }
+  ['f_o_status','f_o_finalidade','f_o_busca'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', renderOrcamentos);
+    document.getElementById(id).addEventListener('change', renderOrcamentos);
+  });
+  document.getElementById('f_o_limpar').addEventListener('click', function(){
+    document.getElementById('f_o_status').value = '';
+    document.getElementById('f_o_finalidade').value = '';
+    document.getElementById('f_o_busca').value = '';
+    renderOrcamentos();
+  });
 
   function renderPrazoAlert(){
     var box = document.getElementById('prazoAlert');
@@ -1809,7 +1973,7 @@
       document.getElementById('it_qtd').value = o.qtd;
       document.getElementById('o_obs').value = o.observacoes || '';
       pendingFotoDataUrl = null; // a foto original não é copiada; anexe de novo se precisar
-      consumoEstoque = (o.consumo || []).map(function(c){ return {itemId:c.itemId, nome:c.nome, qtd:c.qtd, unidade:c.unidade}; });
+      consumoEstoque = (o.consumo || []).map(function(c){ return {itemId:c.itemId, nome:c.nome, qtd:c.qtd, qtdDigitada:c.qtd, unidadeBase:c.unidade, unidadeEntrada:c.unidade}; });
       renderConsumoList();
       recalc();
       closeModal();
@@ -1889,7 +2053,18 @@
   function renderDespesas(){
     var tbody = document.querySelector('#tblDespesas tbody');
     tbody.innerHTML = "";
-    var sorted = despesas.slice().sort(function(a,b){ return b.data.localeCompare(a.data); });
+    var fCat = document.getElementById('f_d_categoria').value;
+    var fBusca = document.getElementById('f_d_busca').value.trim().toLowerCase();
+    var fDe = document.getElementById('f_d_de').value;
+    var fAte = document.getElementById('f_d_ate').value;
+    var filtradas = despesas.filter(function(d){
+      if(fCat && d.categoria !== fCat) return false;
+      if(fBusca && !(d.desc||'').toLowerCase().includes(fBusca)) return false;
+      if(fDe && d.data < fDe) return false;
+      if(fAte && d.data > fAte) return false;
+      return true;
+    });
+    var sorted = filtradas.slice().sort(function(a,b){ return b.data.localeCompare(a.data); });
     document.getElementById('emptyDespesas').style.display = sorted.length ? 'none' : 'block';
     sorted.forEach(function(d){
       var tr = document.createElement('tr');
@@ -1911,6 +2086,23 @@
       });
     });
   }
+  function refreshFiltroDespesaCategoria(){
+    var sel = document.getElementById('f_d_categoria');
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Todas as categorias</option>' + params.categoriasDespesa.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+    sel.value = current;
+  }
+  ['f_d_categoria','f_d_busca','f_d_de','f_d_ate'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', renderDespesas);
+    document.getElementById(id).addEventListener('change', renderDespesas);
+  });
+  document.getElementById('f_d_limpar').addEventListener('click', function(){
+    document.getElementById('f_d_categoria').value = '';
+    document.getElementById('f_d_busca').value = '';
+    document.getElementById('f_d_de').value = '';
+    document.getElementById('f_d_ate').value = '';
+    renderDespesas();
+  });
 
   document.getElementById('formDespesa').addEventListener('submit', function(e){
     e.preventDefault();
@@ -1944,9 +2136,12 @@
     var descricao = document.getElementById('desp_descricao').value.trim();
     var caracteristica = document.getElementById('desp_caracteristica').value.trim();
     var classificacao = document.getElementById('desp_classificacao').value;
-    var unidade = document.getElementById('desp_unidade').value;
-    var qtd = parseFloat(document.getElementById('desp_qtd').value);
-    if(!tipo || isNaN(qtd) || qtd <= 0){ showToast('Preencha tipo e quantidade do insumo.'); return; }
+    var unidadeEntrada = document.getElementById('desp_unidade').value;
+    var qtdDigitada = parseFloat(document.getElementById('desp_qtd').value);
+    if(!tipo || isNaN(qtdDigitada) || qtdDigitada <= 0){ showToast('Preencha tipo e quantidade do insumo.'); return; }
+    var um = UNIDADE_MEDIDA[unidadeEntrada];
+    var qtd = qtdDigitada * um.mult;
+    var unidade = um.base;
 
     var nomeItem = [tipo, (subcategoria&&subcategoria!=='Outro')?subcategoria:null, descricao].filter(Boolean).join(' · ');
 
@@ -1974,7 +2169,16 @@
   function renderVendas(){
     var tbody = document.querySelector('#tblVendas tbody');
     tbody.innerHTML = "";
-    var sorted = vendas.slice().sort(function(a,b){ return b.data.localeCompare(a.data); });
+    var fCat = document.getElementById('f_v_categoria').value;
+    var fCliente = document.getElementById('f_v_cliente').value.trim().toLowerCase();
+    var fBusca = document.getElementById('f_v_busca').value.trim().toLowerCase();
+    var filtradas = vendas.filter(function(v){
+      if(fCat && v.categoria !== fCat) return false;
+      if(fCliente && !(v.cliente||'').toLowerCase().includes(fCliente)) return false;
+      if(fBusca && !(v.produto||'').toLowerCase().includes(fBusca)) return false;
+      return true;
+    });
+    var sorted = filtradas.slice().sort(function(a,b){ return b.data.localeCompare(a.data); });
     document.getElementById('emptyVendas').style.display = sorted.length ? 'none' : 'block';
     sorted.forEach(function(v){
       var lucro = (v.preco - v.custo) * v.qtd;
@@ -2000,6 +2204,22 @@
       });
     });
   }
+  function refreshFiltroVendaCategoria(){
+    var sel = document.getElementById('f_v_categoria');
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Todas as categorias</option>' + params.categoriasProduto.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+    sel.value = current;
+  }
+  ['f_v_categoria','f_v_cliente','f_v_busca'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', renderVendas);
+    document.getElementById(id).addEventListener('change', renderVendas);
+  });
+  document.getElementById('f_v_limpar').addEventListener('click', function(){
+    document.getElementById('f_v_categoria').value = '';
+    document.getElementById('f_v_cliente').value = '';
+    document.getElementById('f_v_busca').value = '';
+    renderVendas();
+  });
 
   document.getElementById('formVenda').addEventListener('submit', function(e){
     e.preventDefault();
