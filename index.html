@@ -52,6 +52,7 @@
     line-height: 1.5;
     min-height: 100vh;
     text-transform: uppercase;
+    overflow-x: hidden;
   }
   input, select, textarea, button{ text-transform: uppercase; }
   input::placeholder, textarea::placeholder{ text-transform: uppercase; }
@@ -136,7 +137,7 @@
   p.section-sub{ margin: 0 0 16px; color: var(--muted); font-size: 13.5px; }
 
   .calc-grid{ display:grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; align-items:start; }
-  @media (max-width: 780px){ .calc-grid{ grid-template-columns: 1fr; } }
+  @media (max-width: 780px){ .calc-grid{ grid-template-columns: minmax(0,1fr); } }
 
   .card{ background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; box-shadow: var(--shadow); }
 
@@ -155,9 +156,9 @@
   details.settings[open] summary::after{ content: "fechar"; }
   .settings-body{ padding: 4px 16px 16px; }
 
-  .field-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
-  .field-grid.cols-3{ grid-template-columns: 1fr 1fr 1fr; }
-  @media (max-width:520px){ .field-grid, .field-grid.cols-3{ grid-template-columns: 1fr 1fr; } }
+  .field-grid{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px 14px; }
+  .field-grid.cols-3{ grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); }
+  @media (max-width:520px){ .field-grid, .field-grid.cols-3{ grid-template-columns: minmax(0,1fr); } }
 
   label.field{ display:flex; flex-direction:column; gap: 5px; font-size: 13px; }
   label.field span.lbl{ color: var(--muted); font-weight:500; }
@@ -203,10 +204,11 @@
   button.btn.small{ font-size: 12px; padding: 6px 10px; }
   button.btn:disabled{ opacity:.45; cursor:not-allowed; }
 
-  .list-card{ background: var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .list-card{ background: var(--surface); border:1px solid var(--border); border-radius:8px; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
   table.tbl{ width:100%; border-collapse: collapse; font-size: 13.5px; }
-  table.tbl th{ text-align:left; font-weight:500; color: var(--muted); font-size: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
-  table.tbl td{ padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.tbl th{ text-align:left; font-weight:500; color: var(--muted); font-size: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+  table.tbl td{ padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  table.tbl td.wrap{ white-space: normal; }
   table.tbl tr:last-child td{ border-bottom:none; }
   table.tbl tr.clickable{ cursor:pointer; }
   table.tbl tr.clickable:hover{ background: var(--surface-2); }
@@ -215,13 +217,13 @@
   .tag-cat{ font-size: 11px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 4px; background: var(--surface-2); border:1px solid var(--border); color: var(--muted); }
   .empty{ padding: 30px 16px; text-align:center; color: var(--muted-2); font-size: 13.5px; }
 
-  form.add-form{ display:grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items:end; background: var(--surface); border:1px solid var(--border); border-radius:8px; padding: 16px; margin-bottom: 16px; }
-  @media (max-width: 780px){ form.add-form{ grid-template-columns: 1fr 1fr; } }
+  form.add-form{ display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 10px; align-items:end; background: var(--surface); border:1px solid var(--border); border-radius:8px; padding: 16px; margin-bottom: 16px; }
+  @media (max-width: 780px){ form.add-form{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
   form.add-form label.field{ grid-column: span 1; }
   form.add-form .span2{ grid-column: span 2; }
   form.add-form button{ grid-column: span 2; height: 38px; min-width: 160px; white-space: nowrap; }
   .checkbox-field{
-    grid-column: 1 / -1; flex-direction: row !important; align-items: center; gap: 10px;
+    grid-column: 1 / -1 !important; flex-direction: row !important; align-items: center; gap: 10px;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
     padding: 12px 14px; cursor: pointer;
   }
@@ -239,9 +241,9 @@
   .filter-bar .field{ min-width: 150px; flex: 1 1 150px; }
   .filter-bar button{ height: 38px; }
 
-  .kpis{ display:grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 18px; }
-  @media (max-width:900px){ .kpis{ grid-template-columns: 1fr 1fr 1fr; } }
-  @media (max-width:560px){ .kpis{ grid-template-columns: 1fr 1fr; } }
+  .kpis{ display:grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+  @media (max-width:900px){ .kpis{ grid-template-columns: repeat(3,minmax(0,1fr)); } }
+  @media (max-width:560px){ .kpis{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
   .kpi{ background: var(--surface); border:1px solid var(--border); border-radius:8px; padding: 14px 16px; }
   .kpi .k-label{ font-size: 12px; color: var(--muted); margin-bottom: 6px; }
   .kpi .k-val{ font-family: var(--font-head); font-size: 20px; font-weight:700; }
@@ -249,10 +251,12 @@
   .kpi.danger .k-val{ color: var(--danger); }
   .kpi.accent .k-val{ color: var(--accent); }
 
-  .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width:780px){ .two-col{ grid-template-columns: 1fr; } }
+  .two-col{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
+  @media (max-width:780px){ .two-col{ grid-template-columns: minmax(0,1fr); } }
 
-  .cat-row{ display:flex; justify-content:space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .cat-row{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .cat-row > *:first-child{ min-width:0; overflow-wrap:anywhere; flex:1; }
+  .cat-row > *:last-child{ flex-shrink:0; }
   .cat-row:last-child{ border-bottom:none; }
   .cat-row .v{ font-family: var(--font-mono); }
   .bar-bg{ background: var(--surface-2); border-radius: 3px; height: 6px; margin-top:4px; overflow:hidden; }
@@ -477,7 +481,7 @@
   <section class="tab-panel" id="tab-fila">
     <h2 class="section-title">Fila de impressão</h2>
 
-    <div class="kpis" style="grid-template-columns: repeat(3,1fr);">
+    <div class="kpis" style="grid-template-columns: repeat(3,minmax(0,1fr));">
       <div class="kpi"><div class="k-label">Peças na fila</div><div class="k-val" id="filaQtd">0</div></div>
       <div class="kpi"><div class="k-label">Tempo total estimado</div><div class="k-val" id="filaTempo">0 h</div></div>
       <div class="kpi"><div class="k-label">Filamento total estimado</div><div class="k-val" id="filaPeso">0 kg</div></div>
@@ -669,7 +673,7 @@
 
     <div class="card" style="margin-bottom:16px;">
       <h3 style="margin-top:0; font-family:var(--font-head); font-size:14px;">Alocação do lucro</h3>
-      <div class="kpis" style="grid-template-columns: repeat(3,1fr); margin-bottom:14px;">
+      <div class="kpis" style="grid-template-columns: repeat(3,minmax(0,1fr)); margin-bottom:14px;">
         <div class="kpi mint"><div class="k-label">Reinvestido</div><div class="k-val" id="kpiReinvestido">R$ 0,00</div></div>
         <div class="kpi accent"><div class="k-label">Retirado</div><div class="k-val" id="kpiRetirado">R$ 0,00</div></div>
         <div class="kpi"><div class="k-label">Lucro não alocado</div><div class="k-val" id="kpiNaoAlocado">R$ 0,00</div></div>
