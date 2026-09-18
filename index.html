@@ -1358,7 +1358,13 @@
       hist.forEach(function(h){
         var sinal = h.tipo === 'compra' ? '+' : '-';
         var cor = h.tipo === 'compra' ? 'var(--mint)' : 'var(--danger)';
-        html += '<div class="ticket-line"><span>'+fmtDate(h.data)+' — '+h.obs+'</span><span class="v" style="color:'+cor+'">'+sinal+fmtQty(h.qtd, item.unidade)+'</span></div>';
+        html += '<div class="ticket-line" style="align-items:center;">'+
+          '<span>'+fmtDate(h.data)+' — '+h.obs+'</span>'+
+          '<span style="display:flex; align-items:center; gap:8px;">'+
+            '<span class="v" style="color:'+cor+'">'+sinal+fmtQty(h.qtd, item.unidade)+'</span>'+
+            '<button type="button" class="btn danger-ghost" data-desfazer="'+h.id+'">Desfazer</button>'+
+          '</span>'+
+        '</div>';
       });
     }
     html += '<div class="modal-foot"><button class="btn ghost" id="fecharHistBtn">Fechar</button></div>';
@@ -1366,6 +1372,32 @@
     document.getElementById('modalOverlay').classList.add('show');
     document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
     document.getElementById('fecharHistBtn').addEventListener('click', closeModal);
+    box.querySelectorAll('[data-desfazer]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var h = hist.find(function(x){ return x.id === btn.dataset.desfazer; });
+        if(!h) return;
+        btn.disabled = true;
+        estornarHistorico(itemId, h).then(function(){
+          showToast('Movimentação desfeita — saldo ajustado.');
+          openHistoricoModal(itemId);
+          renderEstoque();
+        }).catch(function(){ apiFail(); btn.disabled = false; });
+      });
+    });
+  }
+
+  function estornarHistorico(itemId, h){
+    var item = estoque.find(function(it){ return it.id === itemId; });
+    if(!item) return Promise.resolve();
+    var delta = h.tipo === 'compra' ? -h.qtd : h.qtd; // desfazer compra tira do saldo; desfazer baixa devolve ao saldo
+    var novoSaldo = item.saldo + delta;
+    return apiPost('atualizarEstoqueItem', { id: itemId, patch: { Saldo: novoSaldo } }).then(function(){
+      return apiPost('excluirEstoqueHistorico', { id: h.id });
+    }).then(function(){
+      item.saldo = novoSaldo;
+      item.historico = item.historico.filter(function(x){ return x.id !== h.id; });
+      estoqueHistorico = estoqueHistorico.filter(function(x){ return x.id !== h.id; });
+    });
   }
 
   function consumirEstoque(itemId, qtd){
@@ -1378,6 +1410,18 @@
       item.saldo = novoSaldo;
       var h = fromApiHistorico(hr); estoqueHistorico.push(h); item.historico.push(h);
       renderEstoque();
+    });
+  }
+
+  function devolverEstoque(itemId, qtd, obs){
+    var item = estoque.find(function(it){ return it.id === itemId; });
+    if(!item) return Promise.resolve();
+    var novoSaldo = item.saldo + qtd;
+    return apiPost('atualizarEstoqueItem', { id: itemId, patch: { Saldo: novoSaldo } }).then(function(){
+      return apiPost('criarEstoqueHistorico', { payload: toApiHistorico({ itemId: itemId, data: todayStr(), tipo: 'compra', qtd: qtd, obs: obs || 'Estorno' }) });
+    }).then(function(hr){
+      item.saldo = novoSaldo;
+      var h = fromApiHistorico(hr); estoqueHistorico.push(h); item.historico.push(h);
     });
   }
 
@@ -1775,10 +1819,21 @@
     });
 
     document.getElementById('excluirOrcBtn').addEventListener('click', function(){
-      apiPost('excluirOrcamento', { id: id }).then(function(){
+      var consumoList = (o.consumo || []).filter(function(c){ return estoque.some(function(it){ return it.id === c.itemId; }); });
+      var chain = Promise.resolve();
+      consumoList.forEach(function(c){
+        chain = chain.then(function(){
+          return devolverEstoque(c.itemId, c.qtd, 'Estorno — orçamento ' + (o.codigo||'') + ' excluído');
+        });
+      });
+      chain.then(function(){
+        return apiPost('excluirOrcamento', { id: id });
+      }).then(function(){
         orcamentos = orcamentos.filter(function(x){ return x.id !== id; });
         closeModal();
         renderOrcamentos();
+        renderEstoque();
+        showToast('Orçamento excluído' + (consumoList.length ? ' — insumos devolvidos ao estoque.' : '.'));
       }).catch(function(){ apiFail(); });
     });
   }
