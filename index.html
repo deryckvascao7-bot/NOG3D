@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NOG3D — precificação e controle</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NOG3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -406,13 +412,14 @@
           <label class="field"><span class="lbl">Data do pedido</span><input type="date" id="o_dataPedido"></label>
           <label class="field"><span class="lbl">Data de entrega</span><input type="date" id="o_dataEntrega"></label>
 
-          <label class="field"><span class="lbl">Peso do filamento (g)</span><input type="number" step="1" min="0" id="it_peso" value="50"></label>
-          <label class="field"><span class="lbl">Tempo de impressão (h)</span><input type="number" step="0.1" min="0" id="it_horas" value="3"></label>
-          <label class="field"><span class="lbl">Acabamento / pós-processo (min)</span><input type="number" step="1" min="0" id="it_acabamento" value="10"></label>
-          <label class="field"><span class="lbl">Embalagem (R$)</span><input type="number" step="0.01" min="0" id="it_embalagem" value="3"></label>
-          <label class="field"><span class="lbl">Frete a repassar (R$)</span><input type="number" step="0.01" min="0" id="it_frete" value="0"></label>
+          <label class="field"><span class="lbl">Peso do filamento (g) — por peça</span><input type="number" step="1" min="0" id="it_peso" value="50"></label>
+          <label class="field"><span class="lbl">Tempo de impressão total (h)</span><input type="number" step="0.1" min="0" id="it_horas" value="3"></label>
+          <label class="field"><span class="lbl">Acabamento / pós-processo (min) — por peça</span><input type="number" step="1" min="0" id="it_acabamento" value="10"></label>
+          <label class="field"><span class="lbl">Embalagem (R$) — por peça</span><input type="number" step="0.01" min="0" id="it_embalagem" value="3"></label>
+          <label class="field"><span class="lbl">Frete a repassar (R$) — total do pedido</span><input type="number" step="0.01" min="0" id="it_frete" value="0"></label>
           <label class="field"><span class="lbl">Margem de lucro (%)</span><input type="number" step="1" min="0" id="it_margem"></label>
-          <label class="field"><span class="lbl">Quantidade</span><input type="number" step="1" min="1" id="it_qtd" value="1"></label>
+          <label class="field"><span class="lbl">Quantidade nesta impressão</span><input type="number" step="1" min="1" id="it_qtd" value="1"></label>
+          <p class="field wide" style="font-size:11.5px; color:var(--muted); margin:-6px 0 0; text-transform:none;">Se for imprimir várias peças de uma vez na mesma impressão, informe o peso de <strong>uma peça</strong> e o tempo <strong>total</strong> da impressão toda — o sistema divide o tempo e o frete entre as peças automaticamente.</p>
 
           <label class="field"><span class="lbl">Foto do produto</span><input type="file" id="o_foto" accept="image/*"></label>
           <label class="field wide">
@@ -431,16 +438,17 @@
         <h3 id="ticketNome">Peça sem nome</h3>
         <div class="ticket-sub" id="ticketSub">— ficha de custo —</div>
 
-        <div class="ticket-line"><span>Filamento</span><span class="v" id="l_filamento">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Energia</span><span class="v" id="l_energia">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Desgaste da máquina</span><span class="v" id="l_deprec">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Mão de obra</span><span class="v" id="l_maoObra">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Embalagem</span><span class="v" id="l_embalagem">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Custo de produção</span><span class="v" id="l_custoTotal">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Filamento (por peça)</span><span class="v" id="l_filamento">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Energia (rateada)</span><span class="v" id="l_energia">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Desgaste da máquina (rateado)</span><span class="v" id="l_deprec">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Mão de obra (por peça)</span><span class="v" id="l_maoObra">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Embalagem (por peça)</span><span class="v" id="l_embalagem">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Custo de produção (por peça)</span><span class="v" id="l_custoTotal">R$ 0,00</span></div>
         <div class="ticket-line"><span>Taxa de cartão</span><span class="v" id="l_cartao">R$ 0,00</span></div>
-        <div class="ticket-line"><span>Frete repassado</span><span class="v" id="l_freteLine">R$ 0,00</span></div>
-        <div class="ticket-line profit"><span>Lucro estimado</span><span class="v" id="l_lucro">R$ 0,00</span></div>
-        <div class="ticket-line total"><span>Preço de venda</span><span class="v" id="l_precoFinal">R$ 0,00</span></div>
+        <div class="ticket-line"><span>Frete repassado (rateado)</span><span class="v" id="l_freteLine">R$ 0,00</span></div>
+        <div class="ticket-line profit"><span>Lucro estimado (por peça)</span><span class="v" id="l_lucro">R$ 0,00</span></div>
+        <div class="ticket-line total"><span>Preço por peça</span><span class="v" id="l_precoFinal">R$ 0,00</span></div>
+        <div class="ticket-line" id="l_precoTotalWrap"><span>Preço total do pedido</span><span class="v" id="l_precoTotal">R$ 0,00</span></div>
 
         <div class="ticket-foot">
           <button class="btn primary" id="salvarOrcBtn">Salvar orçamento</button>
@@ -751,6 +759,13 @@
       <h3 style="margin-top:0; font-family:var(--font-head); font-size:14px;">Sincronização entre dispositivos</h3>
       <p style="font-size:13px; color:var(--muted); margin:6px 0 12px;" id="syncExplain">Verificando conexão com o banco de dados...</p>
       <button class="btn ghost small" id="syncNowBtn" type="button">Sincronizar agora</button>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="margin-top:0; font-family:var(--font-head); font-size:14px;">Instalar aplicativo no celular</h3>
+      <p style="font-size:13px; color:var(--muted); margin:6px 0 12px;">Instale o NOG3D na tela inicial do seu celular — abre como um app de verdade, com ícone próprio e sem a barra de endereço do navegador. Também continua abrindo (só sem sincronizar dados novos) se você ficar sem internet.</p>
+      <button class="btn primary small" id="installAppBtn" type="button" style="display:none;">Instalar app</button>
+      <p style="font-size:12px; color:var(--muted); margin-top:10px;">No iPhone (Safari) esse botão não aparece — toque no ícone de Compartilhar e depois em "Adicionar à Tela de Início".</p>
     </div>
 
     <details class="settings" id="settingsBox" open>
@@ -1628,17 +1643,20 @@
 
     var pesoEfetivo = peso * (1 + cfg.desperdicio/100);
     var custoFilamento = (pesoEfetivo/1000) * cfg.filamentoKg;
-    var custoEnergia = horas * (cfg.potencia/1000) * cfg.kwh;
-    var custoDeprec = horas * cfg.deprec;
+    var custoEnergiaTotal = horas * (cfg.potencia/1000) * cfg.kwh;
+    var custoDeprecTotal = horas * cfg.deprec;
+    var custoEnergia = custoEnergiaTotal / qtd;
+    var custoDeprec = custoDeprecTotal / qtd;
     var custoMaoObra = (acabMin/60) * cfg.maoObra;
     var custoEmbalagem = embalagem;
+    var freteUnit = frete / qtd;
 
     var custoProducao = custoFilamento + custoEnergia + custoDeprec + custoMaoObra + custoEmbalagem;
     var precoComMargem = custoProducao * (1 + margem/100);
     var precoComCartao = cfg.cartao > 0 ? precoComMargem / (1 - cfg.cartao/100) : precoComMargem;
     var taxaCartaoValor = precoComCartao - precoComMargem;
-    var precoFinal = precoComCartao + frete;
-    var lucro = precoFinal - custoProducao - frete;
+    var precoFinal = precoComCartao + freteUnit;
+    var lucro = precoFinal - custoProducao - freteUnit;
 
     return {
       nome: nome, peso: peso, pesoEfetivo: pesoEfetivo, horas: horas, acabMin: acabMin,
@@ -1652,7 +1670,7 @@
   function recalc(){
     var r = computeOrcamento();
     document.getElementById('ticketNome').textContent = r.nome || 'Peça sem nome';
-    document.getElementById('ticketSub').textContent = r.qtd > 1 ? ('ficha de custo · ' + r.qtd + ' un.') : 'ficha de custo';
+    document.getElementById('ticketSub').textContent = r.qtd > 1 ? ('ficha de custo · ' + r.qtd + ' un. nesta impressão · tempo e frete já divididos') : 'ficha de custo';
     document.getElementById('l_filamento').textContent = brl(r.custoFilamento);
     document.getElementById('l_energia').textContent = brl(r.custoEnergia);
     document.getElementById('l_deprec').textContent = brl(r.custoDeprec);
@@ -1660,9 +1678,11 @@
     document.getElementById('l_embalagem').textContent = brl(r.custoEmbalagem);
     document.getElementById('l_custoTotal').textContent = brl(r.custoProducao);
     document.getElementById('l_cartao').textContent = brl(r.taxaCartaoValor);
-    document.getElementById('l_freteLine').textContent = brl(r.frete);
+    document.getElementById('l_freteLine').textContent = brl(r.qtd > 0 ? r.frete / r.qtd : r.frete);
     document.getElementById('l_lucro').textContent = brl(r.lucro) + " (" + (r.custoProducao>0 ? Math.round((r.lucro/r.custoProducao)*100) : 0) + "%)";
-    document.getElementById('l_precoFinal').textContent = brl(r.precoFinal * r.qtd);
+    document.getElementById('l_precoFinal').textContent = brl(r.precoFinal);
+    document.getElementById('l_precoTotalWrap').style.display = r.qtd > 1 ? 'flex' : 'none';
+    document.getElementById('l_precoTotal').textContent = brl(r.precoFinal * r.qtd);
   }
   calcIds.forEach(function(id){ document.getElementById(id).addEventListener('input', recalc); });
   document.getElementById('o_dataPedido').value = todayStr();
@@ -1868,9 +1888,11 @@
     html += '<div class="hr"></div>';
     html += '<div class="ticket-line"><span>Categoria</span><span class="v">'+(o.categoria||'—')+'</span></div>';
     html += '<div class="ticket-line"><span>Finalidade</span><span class="v">'+(o.finalidade==='venda'?'Venda':(o.finalidade==='presente'?'Presente':'Uso pessoal'))+'</span></div>';
-    html += '<div class="ticket-line"><span>Peso do filamento</span><span class="v">'+o.peso+' g</span></div>';
-    html += '<div class="ticket-line"><span>Tempo de impressão</span><span class="v">'+o.horas+' h</span></div>';
-    html += '<div class="ticket-line"><span>Custo de produção</span><span class="v">'+brl(o.custoProducao)+'</span></div>';
+    html += '<div class="ticket-line"><span>Quantidade</span><span class="v">'+(o.qtd||1)+' peça(s)</span></div>';
+    html += '<div class="ticket-line"><span>Peso do filamento (por peça)</span><span class="v">'+o.peso+' g</span></div>';
+    html += '<div class="ticket-line"><span>Tempo de impressão (total)</span><span class="v">'+o.horas+' h</span></div>';
+    html += '<div class="ticket-line"><span>Custo de produção (por peça)</span><span class="v">'+brl(o.custoProducao)+'</span></div>';
+    if((o.qtd||1) > 1) html += '<div class="ticket-line"><span>Custo de produção (total)</span><span class="v">'+brl(o.custoProducao*(o.qtd||1))+'</span></div>';
     html += '<div class="ticket-line total"><span>Preço do orçamento</span><span class="v">'+brl(o.precoFinal)+'</span></div>';
     if(o.consumo && o.consumo.length){
       html += '<div class="ticket-sub" style="margin-top:10px; margin-bottom:2px;">Insumos consumidos:</div>';
@@ -1943,7 +1965,7 @@
         data: todayStr(),
         categoria: o.finalidade === 'presente' ? 'Presente' : 'Impressão pessoal',
         desc: o.nome + (o.cliente ? (' — para ' + o.cliente) : ''),
-        valor: o.custoProducao
+        valor: o.custoProducao * (o.qtd || 1)
       };
       apiPost('criarDespesa', { payload: toApiDespesa(novaDespesa) }).then(function(r){
         despesas.push(fromApiDespesa(r));
@@ -2563,6 +2585,32 @@
   if(syncNowBtn) syncNowBtn.addEventListener('click', boot);
 
   boot();
+
+  /* ---------- PWA: instalação + service worker ---------- */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){ /* offline na 1ª visita: ok, ignora */ });
+    });
+  }
+
+  var deferredInstallPrompt = null;
+  var installBtn = document.getElementById('installAppBtn');
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if(installBtn) installBtn.style.display = 'inline-flex';
+  });
+  if(installBtn){
+    installBtn.addEventListener('click', function(){
+      if(!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(function(){ deferredInstallPrompt = null; installBtn.style.display = 'none'; });
+    });
+  }
+  window.addEventListener('appinstalled', function(){
+    showToast('App instalado com sucesso!');
+    if(installBtn) installBtn.style.display = 'none';
+  });
 
 })();
 </script>
