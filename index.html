@@ -370,6 +370,7 @@
       <button data-tab="orcamentos" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span><span class="nav-label">Orçamentos</span></button>
       <button data-tab="fila" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg></span><span class="nav-label">Fila de Impressão</span></button>
       <button data-tab="estoque" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span><span class="nav-label">Estoque</span></button>
+      <button data-tab="produtos" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span><span class="nav-label">Produtos Prontos</span></button>
       <button data-tab="clientes" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">Clientes</span></button>
       <button data-tab="despesas" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="nav-label">Despesas</span></button>
       <button data-tab="vendas" class=""><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="nav-label">Vendas</span></button>
@@ -406,6 +407,7 @@
               <option value="venda">Venda</option>
               <option value="pessoal">Uso pessoal</option>
               <option value="presente">Presente</option>
+              <option value="estoque">Estoque</option>
             </select>
           </label>
           <label class="field"><span class="lbl">Cliente</span><input type="text" id="o_cliente" placeholder="Nome do cliente"></label>
@@ -452,6 +454,7 @@
 
         <div class="ticket-foot">
           <button class="btn primary" id="salvarOrcBtn">Salvar orçamento</button>
+          <button class="btn ghost small" id="produzirEstoqueBtn" type="button">Produzir para estoque</button>
           <button class="btn ghost small" id="salvarModeloBtn" type="button">Salvar como modelo</button>
         </div>
       </div>
@@ -476,6 +479,7 @@
           <option value="venda">Venda</option>
           <option value="pessoal">Uso pessoal</option>
           <option value="presente">Presente</option>
+          <option value="estoque">Estoque</option>
         </select>
       </label>
       <label class="field"><span class="lbl">Buscar</span><input type="text" id="f_o_busca" placeholder="Nome, código ou cliente"></label>
@@ -556,6 +560,35 @@
         <tbody></tbody>
       </table>
       <div class="empty" id="emptyEstoque" style="display:none;">Nenhum insumo cadastrado ainda.</div>
+    </div>
+  </section>
+
+  <!-- PRODUTOS PRONTOS -->
+  <section class="tab-panel" id="tab-produtos">
+    <h2 class="section-title">Produtos Prontos</h2>
+
+    <form class="add-form" id="formProduto">
+      <label class="field"><span class="lbl">Nome do produto</span><input type="text" id="pp_nome" placeholder="Ex: Carrinho Fórmula 1" required></label>
+      <label class="field"><span class="lbl">Categoria</span><select id="pp_categoria"></select></label>
+      <label class="field"><span class="lbl">Quantidade produzida</span><input type="number" step="1" min="1" id="pp_qtd" required></label>
+      <label class="field"><span class="lbl">Custo unitário (R$)</span><input type="number" step="0.01" min="0" id="pp_custo"></label>
+      <label class="field"><span class="lbl">Preço sugerido (R$)</span><input type="number" step="0.01" min="0" id="pp_preco"></label>
+      <label class="field"><span class="lbl">Estoque mínimo</span><input type="number" step="1" min="0" id="pp_minimo" placeholder="Ex: 5"></label>
+      <button class="btn primary" type="submit">Adicionar produção</button>
+    </form>
+
+    <div class="filter-bar">
+      <label class="field"><span class="lbl">Filtrar por categoria</span><select id="f_pp_categoria"><option value="">Todas as categorias</option></select></label>
+      <label class="field"><span class="lbl">Buscar</span><input type="text" id="f_pp_busca" placeholder="Nome do produto"></label>
+      <button class="btn ghost small" id="f_pp_limpar" type="button">Limpar filtros</button>
+    </div>
+
+    <div class="list-card">
+      <table class="tbl" id="tblProdutos">
+        <thead><tr><th>Produto</th><th>Categoria</th><th style="text-align:right">Saldo</th><th style="text-align:right">Custo unit.</th><th style="text-align:right">Preço sugerido</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="emptyProdutos" style="display:none;">Nenhum produto pronto cadastrado ainda.</div>
     </div>
   </section>
 
@@ -976,6 +1009,11 @@
   function fromApiAlocacao(r){ return { id:r.ID, data:r.Data, tipo:r.Tipo, desc:r.Descricao, valor:num(r.Valor) }; }
   function toApiAlocacao(o){ return { Data:o.data, Tipo:o.tipo, Descricao:o.desc, Valor:o.valor }; }
 
+  function fromApiProdutoPronto(r){ return { id:r.ID, nome:r.Nome, categoria:r.Categoria, saldo:num(r.Saldo), custoUnit:num(r.CustoUnit), precoSugerido:num(r.PrecoSugerido), minimo:num(r.Minimo), historico:[] }; }
+  function toApiProdutoPronto(o){ return { Nome:o.nome, Categoria:o.categoria, Saldo:o.saldo, CustoUnit:o.custoUnit, PrecoSugerido:o.precoSugerido, Minimo:o.minimo||0 }; }
+  function fromApiProdutoProntoHist(r){ return { id:r.ID, produtoId:r.ProdutoID, data:r.Data, tipo:r.Tipo, qtd:num(r.Qtd), obs:r.Obs }; }
+  function toApiProdutoProntoHist(o){ return { ProdutoID:o.produtoId, Data:o.data, Tipo:o.tipo, Qtd:o.qtd, Obs:o.obs }; }
+
   function normalizeCfg(raw){
     var c = Object.assign({}, DEFAULT_CFG);
     Object.keys(DEFAULT_CFG).forEach(function(k){ if(raw && raw[k] !== undefined && raw[k] !== '') c[k] = num(raw[k]); });
@@ -990,6 +1028,8 @@
   var estoqueHistorico = [];
   var modelos = [];
   var alocacoes = [];
+  var produtosProntos = [];
+  var produtosProntosHistorico = [];
   var params = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
 
   function brl(n){ if(isNaN(n)) n = 0; return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
@@ -1076,12 +1116,13 @@
   function saveTiposInsumo(){ return apiPost('salvarTiposInsumo', { payload: params.tiposInsumo }); }
 
   function refreshCategoriaProdutoSelects(){
-    [document.getElementById('o_categoria'), document.getElementById('v_categoria')].forEach(function(sel){
+    [document.getElementById('o_categoria'), document.getElementById('v_categoria'), document.getElementById('pp_categoria')].forEach(function(sel){
       var current = sel.value;
       sel.innerHTML = params.categoriasProduto.map(function(c){ return '<option>'+c+'</option>'; }).join('');
       if(params.categoriasProduto.indexOf(current) !== -1) sel.value = current;
     });
     refreshFiltroVendaCategoria();
+    refreshFiltroProdutoCategoria();
   }
   function refreshCategoriaDespesaSelect(){
     var sel = document.getElementById('d_categoria');
@@ -1572,6 +1613,204 @@
     });
   }
 
+  /* ---------- PRODUTOS PRONTOS (estoque de peças já impressas) ---------- */
+  function refreshFiltroProdutoCategoria(){
+    var sel = document.getElementById('f_pp_categoria');
+    if(!sel) return;
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Todas as categorias</option>' + params.categoriasProduto.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+    sel.value = current;
+  }
+
+  function renderProdutos(){
+    var tbody = document.querySelector('#tblProdutos tbody');
+    if(!tbody) return;
+    tbody.innerHTML = "";
+    var fCat = document.getElementById('f_pp_categoria').value;
+    var fBusca = document.getElementById('f_pp_busca').value.trim().toLowerCase();
+    var filtrado = produtosProntos.filter(function(p){
+      if(fCat && p.categoria !== fCat) return false;
+      if(fBusca && !(p.nome||'').toLowerCase().includes(fBusca)) return false;
+      return true;
+    });
+    document.getElementById('emptyProdutos').style.display = filtrado.length ? 'none' : 'block';
+    filtrado.slice().sort(function(a,b){ return a.nome.localeCompare(b.nome); }).forEach(function(p){
+      var low = p.minimo && p.saldo < p.minimo;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+p.nome+(low ? ' <span class="stock-badge-low">(baixo)</span>' : '')+'</td>'+
+        '<td><span class="tag-cat">'+(p.categoria||'—')+'</span></td>'+
+        '<td class="num"'+(low?' class="stock-badge-low"':'')+'>'+Math.round(p.saldo)+' un.</td>'+
+        '<td class="num">'+brl(p.custoUnit)+'</td>'+
+        '<td class="num">'+brl(p.precoSugerido)+'</td>'+
+        '<td class="actions">'+
+          '<button class="btn mint small" data-vender="'+p.id+'">Vender</button> '+
+          '<button class="btn ghost small" data-hist-produto="'+p.id+'">Histórico</button> '+
+          '<button class="btn danger-ghost" data-del-produto="'+p.id+'">Remover</button>'+
+        '</td>';
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-vender]').forEach(function(btn){ btn.addEventListener('click', function(){ openVenderProdutoModal(btn.dataset.vender); }); });
+    tbody.querySelectorAll('[data-hist-produto]').forEach(function(btn){ btn.addEventListener('click', function(){ openHistoricoProdutoModal(btn.dataset.histProduto); }); });
+    tbody.querySelectorAll('[data-del-produto]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.delProduto;
+        apiPost('excluirProdutoPronto', { id: id }).then(function(){
+          produtosProntos = produtosProntos.filter(function(p){ return p.id !== id; });
+          renderProdutos();
+        }).catch(function(){ apiFail(); });
+      });
+    });
+  }
+
+  document.getElementById('formProduto').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nome = document.getElementById('pp_nome').value.trim();
+    var categoria = document.getElementById('pp_categoria').value;
+    var qtd = parseInt(document.getElementById('pp_qtd').value);
+    var custo = parseFloat(document.getElementById('pp_custo').value) || 0;
+    var preco = parseFloat(document.getElementById('pp_preco').value) || 0;
+    var minimo = parseFloat(document.getElementById('pp_minimo').value) || 0;
+    if(!nome || isNaN(qtd) || qtd <= 0) return;
+
+    produzirProdutoPronto(nome, categoria, qtd, custo, preco, minimo, 'Produção manual').then(function(){
+      document.getElementById('pp_nome').value = "";
+      document.getElementById('pp_qtd').value = "";
+      document.getElementById('pp_custo').value = "";
+      document.getElementById('pp_preco').value = "";
+      document.getElementById('pp_minimo').value = "";
+      showToast('Estoque de produtos atualizado.');
+    }).catch(function(){ apiFail(); });
+  });
+
+  function produzirProdutoPronto(nome, categoria, qtd, custo, preco, minimo, obs){
+    var existente = produtosProntos.find(function(p){ return p.nome.toLowerCase() === nome.toLowerCase() && p.categoria === categoria; });
+    if(existente){
+      var novoSaldo = existente.saldo + qtd;
+      var patch = { Saldo: novoSaldo };
+      if(custo > 0) patch.CustoUnit = custo;
+      if(preco > 0) patch.PrecoSugerido = preco;
+      if(minimo) patch.Minimo = minimo;
+      return apiPost('atualizarProdutoPronto', { id: existente.id, patch: patch }).then(function(){
+        return apiPost('criarProdutoProntoHistorico', { payload: toApiProdutoProntoHist({ produtoId: existente.id, data: todayStr(), tipo: 'producao', qtd: qtd, obs: obs || 'Produção' }) });
+      }).then(function(hr){
+        existente.saldo = novoSaldo;
+        if(custo > 0) existente.custoUnit = custo;
+        if(preco > 0) existente.precoSugerido = preco;
+        if(minimo) existente.minimo = minimo;
+        var h = fromApiProdutoProntoHist(hr); produtosProntosHistorico.push(h); existente.historico.push(h);
+        renderProdutos();
+        return existente;
+      });
+    }
+    var novo = { nome: nome, categoria: categoria, saldo: qtd, custoUnit: custo, precoSugerido: preco, minimo: minimo };
+    return apiPost('criarProdutoPronto', { payload: toApiProdutoPronto(novo) }).then(function(r){
+      var produto = fromApiProdutoPronto(r);
+      return apiPost('criarProdutoProntoHistorico', { payload: toApiProdutoProntoHist({ produtoId: produto.id, data: todayStr(), tipo: 'producao', qtd: qtd, obs: obs || 'Produção' }) }).then(function(hr){
+        var h = fromApiProdutoProntoHist(hr); produto.historico = [h]; produtosProntosHistorico.push(h);
+        produtosProntos.push(produto);
+        renderProdutos();
+        return produto;
+      });
+    });
+  }
+
+  function openVenderProdutoModal(produtoId){
+    var p = produtosProntos.find(function(x){ return x.id === produtoId; });
+    if(!p) return;
+    var box = document.getElementById('modalBox');
+    box.innerHTML =
+      '<button class="modal-close" id="modalCloseBtn">✕</button>'+
+      '<h3>Vender — '+p.nome+'</h3>'+
+      '<div class="modal-sub">Saldo disponível: '+Math.round(p.saldo)+' un.</div>'+
+      '<label class="field"><span class="lbl">Quantidade</span><input type="number" min="1" max="'+p.saldo+'" step="1" id="vp_qtd" value="1"></label>'+
+      '<label class="field" style="margin-top:10px;"><span class="lbl">Cliente (opcional)</span><input type="text" id="vp_cliente" placeholder="Nome do cliente"></label>'+
+      '<label class="field" style="margin-top:10px;"><span class="lbl">Preço vendido — por unidade (R$)</span><input type="number" min="0" step="0.01" id="vp_preco" value="'+p.precoSugerido.toFixed(2)+'"></label>'+
+      '<div class="modal-foot">'+
+        '<button class="btn mint" id="confirmVenderProdutoBtn">Confirmar venda</button>'+
+        '<button class="btn ghost" id="cancelVenderProdutoBtn">Cancelar</button>'+
+      '</div>';
+    document.getElementById('modalOverlay').classList.add('show');
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelVenderProdutoBtn').addEventListener('click', closeModal);
+    document.getElementById('confirmVenderProdutoBtn').addEventListener('click', function(){
+      var qtd = parseInt(document.getElementById('vp_qtd').value);
+      var preco = parseFloat(document.getElementById('vp_preco').value);
+      var cliente = document.getElementById('vp_cliente').value.trim();
+      if(isNaN(qtd) || qtd <= 0){ return; }
+      if(qtd > p.saldo){ showToast('Não há saldo suficiente desse produto.'); return; }
+      if(isNaN(preco) || preco < 0) preco = 0;
+      var novaVenda = { data: todayStr(), produto: p.nome, cliente: cliente, categoria: p.categoria, qtd: qtd, custo: p.custoUnit, preco: preco };
+      apiPost('criarVenda', { payload: toApiVenda(novaVenda) }).then(function(r){
+        vendas.push(fromApiVenda(r));
+        renderVendas();
+        var novoSaldo = p.saldo - qtd;
+        return apiPost('atualizarProdutoPronto', { id: p.id, patch: { Saldo: novoSaldo } }).then(function(){
+          return apiPost('criarProdutoProntoHistorico', { payload: toApiProdutoProntoHist({ produtoId: p.id, data: todayStr(), tipo: 'venda', qtd: qtd, obs: 'Venda' + (cliente ? (' — ' + cliente) : '') }) });
+        }).then(function(hr){
+          p.saldo = novoSaldo;
+          var h = fromApiProdutoProntoHist(hr); produtosProntosHistorico.push(h); p.historico.push(h);
+          renderProdutos();
+        });
+      }).then(function(){
+        closeModal();
+        showToast('Venda registrada e estoque de produtos atualizado.');
+      }).catch(function(){ apiFail(); });
+    });
+  }
+
+  function openHistoricoProdutoModal(produtoId){
+    var p = produtosProntos.find(function(x){ return x.id === produtoId; });
+    if(!p) return;
+    var hist = (p.historico || []).slice().sort(function(a,b){ return b.data.localeCompare(a.data); });
+    var box = document.getElementById('modalBox');
+    var html = '<button class="modal-close" id="modalCloseBtn">✕</button>';
+    html += '<h3>Histórico — '+p.nome+'</h3>';
+    html += '<div class="modal-sub">Saldo atual: '+Math.round(p.saldo)+' un.</div>';
+    if(hist.length === 0){
+      html += '<div class="empty" style="padding:16px 0;">Sem movimentações ainda.</div>';
+    } else {
+      hist.forEach(function(h){
+        var sinal = h.tipo === 'producao' ? '+' : '-';
+        var cor = h.tipo === 'producao' ? 'var(--mint)' : 'var(--danger)';
+        html += '<div class="ticket-line"><span>'+fmtDate(h.data)+' — '+h.obs+'</span><span class="v" style="color:'+cor+'">'+sinal+Math.round(h.qtd)+' un.</span></div>';
+      });
+    }
+    html += '<div class="modal-foot"><button class="btn ghost" id="fecharHistProdutoBtn">Fechar</button></div>';
+    box.innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('show');
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('fecharHistProdutoBtn').addEventListener('click', closeModal);
+  }
+
+  ['f_pp_categoria','f_pp_busca'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', renderProdutos);
+    document.getElementById(id).addEventListener('change', renderProdutos);
+  });
+  document.getElementById('f_pp_limpar').addEventListener('click', function(){
+    document.getElementById('f_pp_categoria').value = '';
+    document.getElementById('f_pp_busca').value = '';
+    renderProdutos();
+  });
+
+  document.getElementById('produzirEstoqueBtn').addEventListener('click', function(){
+    var r = computeOrcamento();
+    var nome = r.nome || 'Peça sem nome';
+    var categoria = document.getElementById('o_categoria').value;
+    var consumoFiltrado = consumoEstoque.filter(function(c){ return c.qtd && c.qtd > 0; }).map(function(c){ return {itemId:c.itemId, nome:c.nome, qtd:c.qtd, unidade:c.unidadeBase}; });
+    var btn = this; btn.disabled = true; btn.textContent = 'Produzindo...';
+
+    produzirProdutoPronto(nome, categoria, r.qtd, r.custoProducao, r.precoFinal, 0, 'Produção via calculadora').then(function(){
+      var deducoes = consumoFiltrado.map(function(c){ return consumirEstoque(c.itemId, c.qtd, 'Consumo — produção de "'+nome+'" para estoque'); });
+      return Promise.all(deducoes);
+    }).then(function(){
+      showToast(r.qtd + ' un. de "'+nome+'" adicionadas ao estoque de produtos.');
+      clearOrcForm();
+    }).catch(function(){ apiFail(); }).then(function(){
+      btn.disabled = false; btn.textContent = 'Produzir para estoque';
+    });
+  });
+
   /* ---------- MODAL GENERIC ---------- */
   function closeModal(){
     document.getElementById('modalOverlay').classList.remove('show');
@@ -1742,12 +1981,19 @@
     });
   });
 
+  function labelFinalidade(f){
+    if(f === 'venda') return 'Venda';
+    if(f === 'presente') return 'Presente';
+    if(f === 'estoque') return 'Estoque';
+    return 'Uso pessoal';
+  }
+
   function statusInfo(o){
     if(o.status === 'aberto') return {label: o.finalidade === 'venda' ? 'Em aberto' : 'Aguardando registro', cls: 'badge-open'};
     if(o.status === 'em_producao') return {label: 'Em produção', cls: 'badge-progress'};
     if(o.status === 'vendido') return {label: 'Vendido', cls: 'badge-sold'};
     if(o.status === 'nao_vendido') return {label: 'Não vendido', cls: 'badge-lost'};
-    if(o.status === 'concluido') return {label: o.finalidade === 'presente' ? 'Presente · registrado' : 'Uso pessoal · registrado', cls: 'badge-done'};
+    if(o.status === 'concluido') return {label: labelFinalidade(o.finalidade) + ' · registrado', cls: 'badge-done'};
     return {label: o.status, cls: 'badge-done'};
   }
 
@@ -1846,7 +2092,7 @@
         else if(o.dataEntrega === hoje){ prazoLabel = 'Hoje'; prazoColor = 'var(--accent)'; }
         else { prazoLabel = fmtDate(o.dataEntrega); prazoColor = 'var(--ink)'; }
       }
-      var clienteLabel = o.cliente || (o.finalidade === 'presente' ? 'Presente' : (o.finalidade === 'pessoal' ? 'Uso pessoal' : 'Sem cliente'));
+      var clienteLabel = o.cliente || (o.finalidade !== 'venda' ? labelFinalidade(o.finalidade) : 'Sem cliente');
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td style="color:'+prazoColor+'; font-weight:600;">'+prazoLabel+'</td>'+
@@ -1887,7 +2133,7 @@
     html += '<span class="badge '+st.cls+'">'+st.label+'</span>';
     html += '<div class="hr"></div>';
     html += '<div class="ticket-line"><span>Categoria</span><span class="v">'+(o.categoria||'—')+'</span></div>';
-    html += '<div class="ticket-line"><span>Finalidade</span><span class="v">'+(o.finalidade==='venda'?'Venda':(o.finalidade==='presente'?'Presente':'Uso pessoal'))+'</span></div>';
+    html += '<div class="ticket-line"><span>Finalidade</span><span class="v">'+labelFinalidade(o.finalidade)+'</span></div>';
     html += '<div class="ticket-line"><span>Quantidade</span><span class="v">'+(o.qtd||1)+' peça(s)</span></div>';
     html += '<div class="ticket-line"><span>Peso do filamento (por peça)</span><span class="v">'+o.peso+' g</span></div>';
     html += '<div class="ticket-line"><span>Tempo de impressão (total)</span><span class="v">'+o.horas+' h</span></div>';
@@ -1907,6 +2153,8 @@
       html += '<button class="btn mint" id="confirmVendaBtn">Confirmar venda</button>';
       if(o.status === 'aberto') html += '<button class="btn info" id="emProducaoBtn">Marcar em produção</button>';
       html += '<button class="btn danger-ghost" id="marcarNaoVendidoBtn">Não vendido</button>';
+    } else if(pendente && o.finalidade === 'estoque'){
+      html += '<button class="btn mint" id="enviarEstoqueBtn">Enviar para estoque de produtos</button>';
     } else if(pendente){
       html += '<button class="btn primary" id="registrarDespesaBtn">Registrar como despesa</button>';
     }
@@ -1957,6 +2205,21 @@
         renderOrcamentos();
         showToast('Orçamento marcado como não vendido.');
       }).catch(function(){ apiFail(); });
+    });
+
+    var enviarEstoqueBtn = document.getElementById('enviarEstoqueBtn');
+    if(enviarEstoqueBtn) enviarEstoqueBtn.addEventListener('click', function(){
+      enviarEstoqueBtn.disabled = true; enviarEstoqueBtn.textContent = 'Enviando...';
+      var qtd = o.qtd || 1;
+      var precoUnit = o.precoFinal / qtd;
+      produzirProdutoPronto(o.nome, o.categoria, qtd, o.custoProducao, precoUnit, 0, 'Produção via orçamento ' + (o.codigo||'')).then(function(){
+        return apiPost('atualizarOrcamento', { id: o.id, patch: { Status: 'concluido' } });
+      }).then(function(){
+        o.status = 'concluido';
+        closeModal();
+        renderOrcamentos();
+        showToast('Enviado para o estoque de produtos.');
+      }).catch(function(){ apiFail(); enviarEstoqueBtn.disabled = false; enviarEstoqueBtn.textContent = 'Enviar para estoque de produtos'; });
     });
 
     var registrarDespesaBtn = document.getElementById('registrarDespesaBtn');
@@ -2557,6 +2820,9 @@
       modelos = (remote.modelos || []).map(fromApiModelo);
       alocacoes = (remote.alocacoes || []).map(fromApiAlocacao);
       estoque.forEach(function(it){ it.historico = estoqueHistorico.filter(function(h){ return h.itemId === it.id; }); });
+      produtosProntos = (remote.produtosProntos || []).map(fromApiProdutoPronto);
+      produtosProntosHistorico = (remote.produtosProntosHistorico || []).map(fromApiProdutoProntoHist);
+      produtosProntos.forEach(function(p){ p.historico = produtosProntosHistorico.filter(function(h){ return h.produtoId === p.id; }); });
 
       fillCfgForm();
       refreshCategoriaProdutoSelects(); refreshCategoriaDespesaSelect(); refreshTipoInsumoSelects();
@@ -2568,6 +2834,7 @@
       renderOrcamentos();
       renderDespesas();
       renderVendas();
+      renderProdutos();
       renderPainel();
 
       API_ONLINE = true;
